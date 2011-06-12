@@ -69,10 +69,12 @@ exports.create = function(name, config, constr) {
         for (prop in config.properties) {
             addFindAllBy(prop);
             addFindBy(prop);
+            addQueryOn(prop);
         }
         for (view in config.views) {
             addFindAllBy(view);
             addFindBy(view);
+            addQueryOn(view);
         }
         addFindAllBy('id');
         addFindBy('id');
@@ -87,12 +89,23 @@ exports.create = function(name, config, constr) {
             })
         }
 
+        function addQueryOn(prop) {
+            factory['queryOn' + toUpper(prop)] = function(options, callback) {
+                var options = options || {};
+                var url = ['_design/', name, '/_view/', prop].join('');
+                db.query('GET', url, options, function(err, res) {
+                    err && console.log(err);
+                    callback(err ? [] : instantiateResults(res));
+                })
+            }
+        }
+
         function addFindAllBy(prop) {
             factory['findAllBy' + toUpper(prop)] = function(value, callback) {
                 var options = {};
                 if (Array.isArray(value)) {
-                    options.startKey = JSON.stringify(value[0]);
-                    options.endKey = JSON.stringify(value[1]);
+                    options.startkey = JSON.stringify(value[0]);
+                    options.endkey = JSON.stringify(value[1]);
                 } else {
                     options.key = JSON.stringify(value);
                 }

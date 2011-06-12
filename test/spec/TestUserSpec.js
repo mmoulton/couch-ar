@@ -119,6 +119,18 @@ describe('TestUser', function() {
         });
     });
 
+    describe('queryOnUsername() method', function() {
+        it('should query based on username when using queryOnUsername', function() {
+            domain.TestUser.findByUsername('tester', function(user) {
+                domain.TestUser.queryOnUsername({ key: JSON.stringify(user.username) }, function(queryUser) {
+                    expect(user.id).toEqual(queryUser[0].id);
+                    asyncSpecDone();
+                });
+            });
+            asyncSpecWait();
+        });
+    });
+
     describe('findById() method', function() {
         it('should find a user using findById', function() {
             domain.TestUser.findByUsername('tester', function(user) {
